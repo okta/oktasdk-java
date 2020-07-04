@@ -17,8 +17,8 @@ package com.okta.sdk.tests.it
 
 import com.google.common.collect.Lists;
 import com.okta.sdk.client.Client
+import com.okta.sdk.resource.ExtensibleResource
 import com.okta.sdk.resource.user.User
-import com.okta.sdk.resource.user.UserBuilder
 import com.okta.sdk.resource.user.factor.CallFactor
 import com.okta.sdk.resource.user.factor.Factor
 import com.okta.sdk.resource.user.factor.FactorList
@@ -28,14 +28,15 @@ import com.okta.sdk.resource.user.factor.PushFactor
 import com.okta.sdk.resource.user.factor.SecurityQuestionFactor
 import com.okta.sdk.resource.user.factor.SecurityQuestionList
 import com.okta.sdk.resource.user.factor.SmsFactor
-import com.okta.sdk.resource.user.factor.SmsFactorProfile
 import com.okta.sdk.resource.user.factor.TotpFactor
 import com.okta.sdk.resource.user.factor.VerifyFactorRequest
 import com.okta.sdk.resource.user.factor.VerifyFactorResponse
 import com.okta.sdk.tests.it.util.ITSupport
 import org.jboss.aerogear.security.otp.Totp
-import org.jboss.aerogear.security.otp.api.Base32
+import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
+
+import java.util.stream.Collectors
 
 import static org.hamcrest.Matchers.*
 import static org.hamcrest.MatcherAssert.assertThat
@@ -44,6 +45,28 @@ class FactorsIT extends ITSupport {
 
 
     private String smsTestNumber = "162 840 01133"
+
+    @BeforeClass
+    void enableOrgFactors() {
+        def requiredFactors = ["okta_push", "okta_sms", "okta_call", "okta_otp", "google_otp", "fido_webauthn", "okta_question", "fido_u2f"]
+        def orgFactorsUri = "/api/v1/org/factors"
+
+        // get the list of disabled factors
+        ExtensibleResource result = getClient().http().get(orgFactorsUri, ExtensibleResource)
+        List<String> deactivatedFactorIds = result.get("items").stream()
+            .filter { it.id != null }
+            .filter { it.status != "ACTIVE" }
+            .map { it.id }
+            .collect(Collectors.toList())
+
+        // enable any factors that are currently disabled
+        requiredFactors.forEach {
+            if (deactivatedFactorIds.contains(it)) {
+                println "activating: ${it}"
+                println getClient().http().post("${orgFactorsUri}/${it}/lifecycle/activate", ExtensibleResource)
+            }
+        }
+    }
 
     @Test
     void factorListTest() {
