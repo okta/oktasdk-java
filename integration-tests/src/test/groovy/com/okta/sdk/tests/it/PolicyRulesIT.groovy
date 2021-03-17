@@ -150,8 +150,8 @@ class PolicyRulesIT extends ITSupport implements CrudTestSupport {
         registerForCleanup(policyRule)
 
         assertThat policyRule.getActions().getSignon().getAccess(), is(OktaSignOnPolicyRuleSignonActions.AccessEnum.ALLOW)
-        assertThat policyRule.getActions().getSignon().getRequireFactor(), is(false)
-        assertThat policyRule.getActions().getSignon().getRememberDeviceByDefault(), is(false)
+        assertThat policyRule.getActions().getSignon().RequireFactor(), is(false)
+        assertThat policyRule.getActions().getSignon().RememberDeviceByDefault(), is(false)
         assertThat policyRule.getActions().getSignon().getSession().getMaxSessionIdleMinutes(), is(720)
         assertThat policyRule.getActions().getSignon().getSession().getMaxSessionLifetimeMinutes(), is(0)
         assertThat policyRule.getConditions().getAuthContext().getAuthType(), is(PolicyRuleAuthContextCondition.AuthTypeEnum.ANY)
@@ -209,10 +209,10 @@ class PolicyRulesIT extends ITSupport implements CrudTestSupport {
         assertThat policyRule.getConditions().getPeople().getUsers().getExclude(), is(Collections.emptyList())
         assertThat policyRule.getConditions().getPeople().getGroups(), nullValue()
         assertThat policyRule.getActions().getSignon().getAccess(), is(OktaSignOnPolicyRuleSignonActions.AccessEnum.ALLOW)
-        assertThat policyRule.getActions().getSignon().getRequireFactor(), is(true)
-        assertThat policyRule.getActions().getSignon().getRememberDeviceByDefault(), is(false)
+        assertThat policyRule.getActions().getSignon().RequireFactor(), is(true)
+        assertThat policyRule.getActions().getSignon().RememberDeviceByDefault(), is(false)
         assertThat policyRule.getConditions().getNetwork().getConnection(), is(PolicyNetworkCondition.ConnectionEnum.ANYWHERE)
-        assertThat policyRule.getActions().getSignon().getSession().getUsePersistentCookie(), is(false)
+        assertThat policyRule.getActions().getSignon().getSession().UsePersistentCookie(), is(false)
         assertThat policyRule.getActions().getSignon().getSession().getMaxSessionLifetimeMinutes(), is(0)
         assertThat policyRule.getActions().getSignon().getSession().getMaxSessionIdleMinutes(), is(720)
     }
@@ -236,7 +236,7 @@ class PolicyRulesIT extends ITSupport implements CrudTestSupport {
 
         assertThat policyRule.getType(), is(PolicyRule.TypeEnum.SIGN_ON)
         assertThat policyRule.getActions().getSignon().getAccess(), is(OktaSignOnPolicyRuleSignonActions.AccessEnum.DENY)
-        assertThat policyRule.getActions().getSignon().getRequireFactor(), is(false)
+        assertThat policyRule.getActions().getSignon().RequireFactor(), is(false)
         assertThat policyRule.getConditions().getAuthContext().getAuthType(), is(PolicyRuleAuthContextCondition.AuthTypeEnum.ANY)
         assertThat policyRule.getConditions().getNetwork().getConnection(), is(PolicyNetworkCondition.ConnectionEnum.ANYWHERE)
     }

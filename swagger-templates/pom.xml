@@ -28,7 +28,7 @@
     <name>Okta Java SDK :: Swagger Templates</name>
 
     <properties>
-        <swagger-version>2.2.3</swagger-version>
+        <swagger-version>2.4.14</swagger-version>
     </properties>
 
     <dependencies>

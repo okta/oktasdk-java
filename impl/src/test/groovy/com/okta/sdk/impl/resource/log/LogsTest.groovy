@@ -122,7 +122,7 @@ class LogsTest {
         assertThat log.getSecurityContext().asOrg, nullValue()
         assertThat log.getSecurityContext().isp, nullValue()
         assertThat log.getSecurityContext().domain, nullValue()
-        assertThat log.getSecurityContext().getIsProxy(), equalTo(false)
+        assertThat log.getSecurityContext().IsProxy(), equalTo(false)
 
         assertThat log.getDebugContext(), instanceOf(LogDebugContext)
         assertThat log.getDebugContext().getDebugData().get("requestUri"), equalTo("/api/v1/users/00ud384zryL1GFAg30h7/lifecycle/deactivate")
