@@ -34,6 +34,7 @@ import com.okta.sdk.resource.role.RoleType
 import com.okta.sdk.resource.user.AuthenticationProviderType
 import com.okta.sdk.resource.user.ChangePasswordRequest
 import com.okta.sdk.resource.user.PasswordCredential
+import com.okta.sdk.resource.user.PasswordCredentialHashAlgorithm
 import com.okta.sdk.resource.user.RecoveryQuestionCredential
 import com.okta.sdk.resource.user.ResetPasswordToken
 import com.okta.sdk.resource.user.Role
@@ -746,7 +747,7 @@ class UsersIT extends ITSupport implements CrudTestSupport {
     void importUserWithSha512Password() {
 
         def salt = "aSalt"
-        def hashedPassword = hashPassword("aPassword", salt)
+        def hashedPassword = hashPassword("aPassword", salt, PasswordCredentialHashAlgorithm.SHA_512)
 
         def email = "joe.coder+${uniqueTestName}@example.com"
         User user = UserBuilder.instance()
@@ -759,6 +760,57 @@ class UsersIT extends ITSupport implements CrudTestSupport {
 
         assertThat user.getCredentials(), notNullValue()
         assertThat user.getCredentials().getProvider().getType(), is(AuthenticationProviderType.IMPORT)
+    }
+
+    @Test
+    void importUserWithMd5Password() {
+        def salt = "aSalt"
+
+        User user = UserBuilder.instance()
+                .setEmail("joe.coder+${uniqueTestName}@example.com")
+                .setFirstName("Joe")
+                .setLastName("Code")
+                .setMd5PasswordHash(hashPassword("aPassword", salt, PasswordCredentialHashAlgorithm.MD5), salt, "PREFIX")
+                .buildAndCreate(getClient())
+        registerForCleanup(user)
+
+        assertThat user.getCredentials(), notNullValue()
+        assertThat user.getCredentials().getProvider().getType(), is(AuthenticationProviderType.IMPORT)
+    }
+
+    @Test(enabled = false)      // TODO: Enable it back when 379446 is resolved.
+    void importCreateAndLoginUserWithMd5Password() {
+        def salt = "aSalt"
+        def password = "aPassword"
+        def hashPassword = hashPassword(password, salt, PasswordCredentialHashAlgorithm.MD5)
+        def login = "joe.coder+${uniqueTestName}@example.com"
+        def client = getClient()
+
+        User user = UserBuilder.instance()
+            .setEmail(login)
+            .setFirstName("Joe")
+            .setLastName("Code")
+            .setMd5PasswordHash(hashPassword, salt, "PREFIX")
+            .buildAndCreate(client)
+        registerForCleanup(user)
+
+        URL url = new URL(new URL(new URL(user.getResourceHref()), "/").toString() + "api/v1/authn")
+        HttpURLConnection con = (HttpURLConnection) url.openConnection()
+        con.setRequestMethod("POST")
+        con.setRequestProperty("Content-Type", "application/json; utf-8")
+        con.setRequestProperty("Accept", "application/json")
+        con.setDoOutput(true)
+        byte[] input = "{\"password\":\"${password}\",\"username\":\"${login}\"}".getBytes("utf-8")
+        con.getOutputStream().write(input, 0, input.length)
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"))
+        StringBuilder response = new StringBuilder()
+        String responseLine
+        while ((responseLine = br.readLine()) != null) {
+            response.append(responseLine.trim())
+        }
+
+        assertThat response.toString().contains("\"status\":\"SUCCESS\""), is(true)
     }
 
     private void ensureCustomProperties() {
@@ -793,8 +845,8 @@ class UsersIT extends ITSupport implements CrudTestSupport {
         return addProperty
     }
 
-    private String hashPassword(String password, String salt) {
-        def messageDigest = MessageDigest.getInstance("SHA-512")
+    private static String hashPassword(String password, String salt, PasswordCredentialHashAlgorithm algorithm) {
+        def messageDigest = MessageDigest.getInstance(algorithm.toString())
         messageDigest.update(salt.getBytes(StandardCharsets.UTF_8))
         def bytes = messageDigest.digest(password.getBytes(StandardCharsets.UTF_8))
         return Base64.getEncoder().encodeToString(bytes)

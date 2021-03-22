@@ -84,5 +84,7 @@ public interface UserBuilder {
 
     UserBuilder setSha1PasswordHash(String value, String salt, String saltOrder);
 
+    UserBuilder setMd5PasswordHash(String value, String salt, String saltOrder);
+
     User buildAndCreate(Client client);
 }
