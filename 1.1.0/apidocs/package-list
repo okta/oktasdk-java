@@ -1,0 +1,16 @@
+com.okta.sdk.authc.credentials
+com.okta.sdk.cache
+com.okta.sdk.client
+com.okta.sdk.ds
+com.okta.sdk.error
+com.okta.sdk.error.authc
+com.okta.sdk.http
+com.okta.sdk.lang
+com.okta.sdk.resource
+com.okta.sdk.resource.application
+com.okta.sdk.resource.group
+com.okta.sdk.resource.group.rule
+com.okta.sdk.resource.log
+com.okta.sdk.resource.session
+com.okta.sdk.resource.user
+com.okta.sdk.resource.user.factor
